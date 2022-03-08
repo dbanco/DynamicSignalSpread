@@ -7,7 +7,7 @@ function [X_hat, err, obj, l1_norm, tv_penalty] = convADMM_LASSO_CG_TVphi_1D(A0f
 %   A0ft_stack - (n x t) fft of unshifted gaussian basis matrices
 %   params     - struct containing the following field
 %   lambda     - l1 penalty parameter > 0
-%   lambda2    - TVx penalty parameter > 0
+%   gamma    - TVx penalty parameter > 0
 %   adaptRho   - adaptive rho enable: 1 or 0
 %   rho        - admm penalty parameter > 0
 %   rho2       - admm penalty parameter > 0
@@ -34,8 +34,8 @@ function [X_hat, err, obj, l1_norm, tv_penalty] = convADMM_LASSO_CG_TVphi_1D(A0f
 
 % Get parameters
 tolerance = params.tolerance;
-lambda1 = params.lambda1;
-lambda2 = params.lambda2;
+lambda = params.lambda;
+gamma = params.gamma;
 rho1 = params.rho1;
 rho2 = params.rho2;
 mu = params.mu;
@@ -92,7 +92,7 @@ while keep_going && (nIter < maxIter)
     end
     % y-update and v-update
     for t = 1:T
-        Ykp1(:,:,t) = soft(alpha*Xkp1(:,:,t) + (1-alpha)*Yk(:,:,t) + Vk(:,:,t), lambda1(t)/rho1);
+        Ykp1(:,:,t) = soft(alpha*Xkp1(:,:,t) + (1-alpha)*Yk(:,:,t) + Vk(:,:,t), lambda(t)/rho1);
     end
     if isNonnegative
         Ykp1(Ykp1<0) = 0;
@@ -100,7 +100,7 @@ while keep_going && (nIter < maxIter)
     Vk = Vk + alpha*Xkp1 + (1-alpha)*Yk - Ykp1;
     
     % z-update and u-update
-    Zkp1 = soft(DiffPhiX_1D(Xkp1) + Uk, lambda2/rho2);
+    Zkp1 = soft(DiffPhiX_1D(Xkp1) + Uk, gamma/rho2);
     Uk = Uk + DiffPhiX_1D(Xkp1) - Zkp1;
     
     % Track and display error, objective, sparsity
@@ -108,10 +108,10 @@ while keep_going && (nIter < maxIter)
     err(nIter) = sum(((B-fit).^2),'all');
     Xsum = 0;
     for t = 1:T
-        Xsum = Xsum + lambda1(t)*sum(abs(Xkp1(:,:,t)),'all');
+        Xsum = Xsum + lambda(t)*sum(abs(Xkp1(:,:,t)),'all');
     end
     l1_norm(nIter) = Xsum;
-    tv_penalty(nIter) = lambda2*sum(abs(DiffPhiX_1D(Xkp1)),'all');
+    tv_penalty(nIter) = gamma*sum(abs(DiffPhiX_1D(Xkp1)),'all');
     f = 0.5*err(nIter) + l1_norm(nIter) + tv_penalty(nIter);
     
     obj(nIter) = f;

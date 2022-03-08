@@ -7,12 +7,13 @@ function b = gaussian_basis_wrap_1D(N_x,mean_x,std_x,scaling)
 % scaling - '2-norm' unit 2-norm scaling
 %           '1-norm' unit 1-norm scaling
 %           'max'    unit max scaling factor
-%           default is regular Gaussian scaling factor
+%           'rms'    unit root-mean-square
+%           default is standard Gaussian scaling factor
 
 % Outputs:
 % b - (N x 1) vector
 
-% Compute theta distances with wrapping
+% Compute theta distances with wrapping at boundaries
 idx = 1:N_x;
 wrapN = @(x, N) (1 + mod(x-1, N));
 opposite = (idx(wrapN(floor(mean_x-N_x/2),N_x)) +... 

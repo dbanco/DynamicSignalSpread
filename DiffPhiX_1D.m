@@ -1,5 +1,12 @@
 function DiffPhi = DiffPhiX_1D(X)
-%DiffPhiX_1D Apply summing over space and temporal difference matrix 
+%DiffPhiX_1D Compute the difference between unnormalized variance
+%distribution functions
+%
+% Inputs:
+% X - Coefficients [N,K,T]
+%
+% Outputs:
+% DiffPhi - UVDF difference [K,T-1]
 
 [~,K,T] = size(X);
 DiffPhi = zeros(K,T-1);
