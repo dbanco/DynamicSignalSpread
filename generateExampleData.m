@@ -15,8 +15,12 @@ std_param2 = 10*[0.5 0.55]+10;
 % std_param2 = 10*rand(numSpots,1)+10;
 std_time = zeros(numSpots,T);
 awmv_true = zeros(T,1);
+% for i = 1:numSpots
+%    std_time(i,:) = linspace(std_param(i),std_param2(i),T); 
+% end
 for i = 1:numSpots
-   std_time(i,:) = linspace(std_param(i),std_param2(i),T); 
+   std_time(i,:) = [ones(1,floor(T/2))*std_param(i),...
+                    ones(1,ceil(T/2))*std_param2(i)]; 
 end
 for t = 1:T
     for i = 1:numSpots

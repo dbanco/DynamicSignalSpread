@@ -3,7 +3,7 @@
 close all
 
 T = 10;
-noise = 0.2;
+noise = 0.18;
 N = 200;
 [B,B_noise,awmv_true] = generateExampleData(T,noise);
 
@@ -42,32 +42,27 @@ params.verbose = 1;      % flag to print objective values at each iteration
 P.params = params;
 
 % Construct dictionary
-A0ft = dictionaryFFT(P);
-A0 = dictionary(P);
+D0ft = dictionaryFFT(P);
+D0 = dictionary(P);
 
 %% Setup and solve
-% Parameters here need to be set
-lambda = 1.1;
-params.lambda = lambda; % sparsity penalty
-params.rho1 = 1;  % ADMM parameter
-
 % Without temporal coupling
+params.rho1 = 1;  % ADMM parameter
+params.lambda = [0.9*ones(T/2,1),1.4*ones(T/2,1)];
+
 params.rho2 = 0;
 params.gamma = 0;
-params.lambda = lambda*ones(T,1);
-X_hat_indep = convADMM_LASSO_CG_TVphi_1D(A0ft,B_noise,zeros(N,P.num_var_t,T),params);
-B_hat_indep = Ax_ft_1D_Time(A0ft,X_hat_indep);
+X_hat_indep = convADMM_LASSO_CG_TVphi_1D(D0ft,B_noise,zeros(N,P.num_var_t,T),params);
+B_hat_indep = Ax_ft_1D_Time(D0ft,X_hat_indep);
 
 % With temporal coupling
 params.rho2 = 1;
-params.gamma = 0.5;
-params.lambda = lambda*ones(T,1);
-X_hat = convADMM_LASSO_CG_TVphi_1D(A0ft,B_noise,X_hat_indep,params);
-B_hat = Ax_ft_1D_Time(A0ft,X_hat);
+params.gamma = 0.3;
+X_hat = convADMM_LASSO_CG_TVphi_1D(D0ft,B_noise,X_hat_indep,params);
+B_hat = Ax_ft_1D_Time(D0ft,X_hat);
 
-%% Plot awmv recovery and 
-
-fig3 = figure(3)
+%% Plot awmv recovery
+fig3 = figure(3);
 subplot(1,4,1)
 waterfall(B')
 title('truth')
@@ -104,39 +99,3 @@ legend('true',...
        sprintf('coupled: %0.3f',awmv_err4),...
        'Location','Best')
 fig4.Position = [1276 562 560 420];
-
-% Plot variance distribution function
-% vdf3 = sum(x_hat3,1)/sum(x_hat3,'all');
-% subplot(1,2,2)
-% bar(vdf3)
-% xlabel('narrow --> \sigma index --> wide')
-% ylabel('\Sigma x_i / \Sigma x')
-% title('VDF')
-%{
-Notes:
-
-Changing the lambda parameter will render different results:
-- lambda = 1 fits the peak well and not the noise (this is ideal)
-- lambda = 0.1 fits the peak and the noise well
-- lambda = 0.01 fits everything almost exactly
-- lambda = 10 fits peak poorly and fits mean of noise with wide basis
-            function
-- lambda = 100 fit is worse
-
-We can look at which basis functions were used and how that varies with
-selection of lambda:
-- lambda = 1 
-    Basis function 2 with sigma ~3.1 contributes ~40% of the signal
-    Basis function 3 with sigma ~5.7 contributes ~53% of the signal
-    True sigma is sqrt(20) = 4.47
-    3.1*0.40 + 5.7*0.53 = 4.3
-    The 2 basis functions nearest in size to the peak in the data
-    contribute 93% of the signal
-- lambda = 0.01 Biases solution towards using the smallest basis function 
-    which allows the algorithm to fit everything almost exactly
-- lambda = 100 Biases solution towards using the larger basis functions
-    than are necessary because they tend to be cheaper in terms of l1-norm
-    cost.
-
-%}
-
