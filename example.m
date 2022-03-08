@@ -3,7 +3,8 @@
 close all
 
 T = 10;
-noise = 0.03;
+noise = 0.2;
+N = 200;
 [B,B_noise,awmv_true] = generateExampleData(T,noise);
 
 figure(1)
@@ -20,7 +21,6 @@ P.num_theta = size(B,1);
 % Define dictionary of Gaussian basis functions
 P.num_var_t = 20;   % Number of different basis functions 
 P.var_theta = linspace(1/2,35,P.num_var_t).^2; % Variances of basis functions
-P.basis = 'norm2';
 
 % ADMM parameters
 params.adaptRho = 1; % binary flag for adaptive rho
@@ -60,9 +60,9 @@ B_hat_indep = Ax_ft_1D_Time(A0ft,X_hat_indep);
 
 % With temporal coupling
 params.rho2 = 1;
-params.gamma = 0.01;
+params.gamma = 0.5;
 params.lambda = lambda*ones(T,1);
-X_hat = convADMM_LASSO_CG_TVphi_1D(A0ft,B_noise,zeros(N,P.num_var_t,T),params);
+X_hat = convADMM_LASSO_CG_TVphi_1D(A0ft,B_noise,X_hat_indep,params);
 B_hat = Ax_ft_1D_Time(A0ft,X_hat);
 
 %% Plot awmv recovery and 

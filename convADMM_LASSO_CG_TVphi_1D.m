@@ -45,9 +45,6 @@ alpha = params.alpha;
 maxIter = params.maxIter;
 isNonnegative = params.isNonnegative;
 
-zPad = params.zeroPad;
-zMask = params.zeroMask;
-
 [N,K,T] = size(X_init);
 Bnorms = zeros(T,1);
 for j = 1:T
@@ -57,7 +54,6 @@ for j = 1:T
 end
 
 % Initialize variables
-X_init = forceMaskToZeroArray(X_init,zMask);
 Xk = X_init;
 Xmin = X_init;
 
@@ -85,7 +81,7 @@ while keep_going && (nIter < maxIter)
     
     % x-update
     if (nIter > 1) || (sum(X_init,'all') == 0) 
-        [Xkp1,cgIters] = conjGrad_TVphi_1D( A0ft_stack,B,Bnorms,Xk,(Yk-Vk),(Zk-Uk),params,zMask);
+        [Xkp1,cgIters] = conjGrad_TVphi_1D( A0ft_stack,B,Bnorms,Xk,(Yk-Vk),(Zk-Uk),params);
     else
         Xkp1 = Xk;
         cgIters = 0;
