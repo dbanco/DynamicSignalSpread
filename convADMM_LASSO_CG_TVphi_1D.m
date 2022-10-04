@@ -1,13 +1,13 @@
-function [X_hat, err, obj, l1_norm, tv_penalty] = convADMM_LASSO_CG_TVphi_1D(A0ft_stack,B,X_init,params)
+function [X_hat, err, obj, l1_norm, tv_penalty] = convADMM_LASSO_CG_TVphi_1D(A0,B,X_init,params)
 %convADMM_LASSO_1D Image regression by solving LASSO problem 
 %                argmin_x 0.5*||Ax-b||^2 + lambda||x||_1
 %
 % Inputs:
-%   b          - (n) polar ring image
-%   A0ft_stack - (n x t) fft of unshifted gaussian basis matrices
+%   b          - (n) 1D signal
+%   A0 - (n x t) fft of unshifted gaussian basis matrices
 %   params     - struct containing the following field
 %   lambda     - l1 penalty parameter > 0
-%   gamma    - TVx penalty parameter > 0
+%   lambda2    - TVx penalty parameter > 0
 %   adaptRho   - adaptive rho enable: 1 or 0
 %   rho        - admm penalty parameter > 0
 %   rho2       - admm penalty parameter > 0
@@ -48,9 +48,12 @@ isNonnegative = params.isNonnegative;
 [N,K,T] = size(X_init);
 Bnorms = zeros(T,1);
 for j = 1:T
-%     Bnorms(j) = norm(squeeze(B(:,j)));
-    Bnorms(j) = 1;
-%     B(:,j) = B(:,j)/Bnorms(j);
+    if params.normData
+        Bnorms(j) = norm(squeeze(B(:,j)));
+    else
+        Bnorms(j) = 1;
+    end
+    B(:,j) = B(:,j)/Bnorms(j);
 end
 
 % Initialize variables
@@ -81,7 +84,7 @@ while keep_going && (nIter < maxIter)
     
     % x-update
     if (nIter > 1) || (sum(X_init,'all') == 0) 
-        [Xkp1,cgIters] = conjGrad_TVphi_1D( A0ft_stack,B,Bnorms,Xk,(Yk-Vk),(Zk-Uk),params);
+        [Xkp1,cgIters] = conjGrad_TVphi_1D( A0,B,Bnorms,Xk,(Yk-Vk),(Zk-Uk),params);
     else
         Xkp1 = Xk;
         cgIters = 0;
@@ -100,7 +103,7 @@ while keep_going && (nIter < maxIter)
     Uk = Uk + DiffPhiX_1D(Xkp1) - Zkp1;
     
     % Track and display error, objective, sparsity
-    fit = Ax_ft_1D_Time(A0ft_stack,Xkp1,Bnorms);
+    fit = Ax_ft_1D_Time(A0,Xkp1,Bnorms);
     err(nIter) = sum(((B-fit).^2),'all');
     Xsum = 0;
     for t = 1:T
@@ -139,14 +142,14 @@ while keep_going && (nIter < maxIter)
         legend('data','fit')
         
         subplot(2,1,2)
-        P.var_theta = [linspace(0.5,100,30)].^2;
-        awmv = zeros(T,1);
-        var_signal = squeeze(sum(Xkp1,1));
-        var_sum = squeeze(sum(var_signal,1));
-        for t = 1:T
-            awmv(t) = sum(sqrt(P.var_theta(:)).*var_signal(:,t))/var_sum(t);
-        end
+        sigmas = linspace(0.5,25,20);
+        awmv = computeAWMV_1D(Xkp1,sigmas);
+        awmv_indep = computeAWMV_1D(X_init,sigmas);
+        plot(linspace(3,15,T))
+        hold on
         plot(awmv)
+        plot(awmv_indep)
+        hold off
 
         
     end
