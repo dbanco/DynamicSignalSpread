@@ -11,11 +11,5 @@ for t = 2:(T-1)
     DtR(:,t) = R(:,t-1) - R(:,t);
 end
 
-% PtDtR = zeros(N,K,T);
-% for i = 1:T
-%     vec = DtR(:,i)';
-%     bigVec = repmat(vec,[N,1]);
-%     PtDtR(:,:,i) = bigVec;
-% end
 DtR = reshape(DtR,1,size(DtR,1),size(DtR,2));
 PtDtR = repmat(DtR, [N,1,1]);
