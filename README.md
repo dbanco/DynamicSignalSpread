@@ -1,5 +1,6 @@
 # Quantifying Dynamic Signal Spread in Real-Time High Energy X-ray Diffraction
-##### Banco, D. P.; Miller, E.; Beaudoin, A.; Miller, M. P.; Chatterjee, K.
+Banco, D. P.; Miller, E.; Beaudoin, A.; Miller, M. P.; Chatterjee, K.
+https://doi.org/10.1007/s40192-022-00281-4
 
 ## Time varying Gaussian peak example:
 example.m
