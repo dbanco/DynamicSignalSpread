@@ -1,7 +1,6 @@
 function Y = Ax_ft_1D_Time(A0,X,Bnorms)
 %conjGradResidual Compute residual for conjugate gradient that includes 
 % difference matrix
-%   Detailed explanation goes here
 
 T = size(X,3);
 [N,~] = size(A0);

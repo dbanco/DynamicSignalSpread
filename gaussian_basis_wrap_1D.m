@@ -1,9 +1,9 @@
 function b = gaussian_basis_wrap_1D(N,mu,sigma,scaling)
 %gaussian_basis_wrap_1D Generates gaussian peak function vector
 % Inputs:
-% N_x - vector length
-% mean_x - mean of gaussian basis function
-% std_x - standard deviation of gaussian basis function
+% N - vector length
+% mu - mean of gaussian basis function
+% sigma - standard deviation of gaussian basis function
 % scaling - '2-norm' unit 2-norm scaling
 %           '1-norm' unit 1-norm scaling
 %           'max'    unit max scaling factor

@@ -3,30 +3,28 @@ function [X_hat, err, obj, l1_norm, tv_penalty] = convADMM_LASSO_CG_TVphi_1D(A0,
 %                argmin_x 0.5*||Ax-b||^2 + lambda||x||_1
 %
 % Inputs:
-%   b          - (n) 1D signal
-%   A0 - (n x t) fft of unshifted gaussian basis matrices
-%   params     - struct containing the following field
-%   lambda     - l1 penalty parameter > 0
-%   lambda2    - TVx penalty parameter > 0
-%   adaptRho   - adaptive rho enable: 1 or 0
-%   rho        - admm penalty parameter > 0
-%   rho2       - admm penalty parameter > 0
-%   tau        - adaptive rho parameter: 1.01-1.5
-%   mu         - separation factor between primal and dual residual
-%   alpha      - momentum parameter1.1-1.8
+%   b             - (N) 1D signal
+%   A0            - (N x T) fft of unshifted gaussian basis matrices
+%   params        - struct containing the following field
+%   lambda        - l1 penalty parameter > 0
+%   lambda2       - TVx penalty parameter > 0
+%   adaptRho      - adaptive rho enable: 1 or 0
+%   rho           - admm penalty parameter > 0
+%   rho2          - admm penalty parameter > 0
+%   tau           - adaptive rho parameter: 1.01-1.5
+%   mu            - separation factor between primal and dual residual
+%   alpha         - momentum parameter 1.1-1.8
 %   isNonnegative - flag to enforce nonnegative solution
-%   x_init - initial guess of solution
+%   x_init        - (N x K x T) initial guess of solution
 %
 %   stoppingCriterion - 'OBJECTIVE_VALUE' or 'COEF_CHANGE'
 %   tolerance - tolerance for stopping criterion
 %   maxIter - maximum number of iterations
 %
-%   zeroPad         - [row_pad_width,col_pad_width]
-%   zeroMask        - [row_indices,col_indices]
 %   plotProgress    - 0 or 1
 %
 % Outputs:
-% x_hat - (n x t) solution 
+% x_hat - (N x T) solution 
 % err - (nIters) relative error of solution at each iteration
 % obj - (nIters) objective value of solution at each iteration
 % l_0 - (nIters) sparsity of solution at each iteration
@@ -54,18 +52,19 @@ for j = 1:T
         Bnorms(j) = 1;
     end
     B(:,j) = B(:,j)/Bnorms(j);
+    X_init(:,:,j) = X_init(:,:,j)/Bnorms(j);
 end
 
 % Initialize variables
 Xk = X_init;
 Xmin = X_init;
 
-% L1 norm variable/lagranage multipliers
+% L1 norm variable/lagrange multipliers
 Yk = X_init;
 Ykp1 = X_init;
 Vk = zeros(size(Yk));
 
-% TVx variable/lagranage multipliers
+% TVx variable/lagrange multipliers
 Zk = DiffPhiX_1D(X_init);
 Uk = zeros(size(Zk));
 
@@ -80,7 +79,6 @@ nIter = 0;
 count = 0;
 while keep_going && (nIter < maxIter)
     nIter = nIter + 1;   
-    
     
     % x-update
     if (nIter > 1) || (sum(X_init,'all') == 0) 
@@ -141,15 +139,15 @@ while keep_going && (nIter < maxIter)
         plot(fit(:,10))
         legend('data','fit')
         
-        subplot(2,1,2)
-        sigmas = linspace(0.5,25,20);
-        awmv = computeAWMV_1D(Xkp1,sigmas);
-        awmv_indep = computeAWMV_1D(X_init,sigmas);
-        plot(linspace(3,15,T))
-        hold on
-        plot(awmv)
-        plot(awmv_indep)
-        hold off
+%         subplot(2,1,2)
+%         sigmas = linspace(0.5,25,20);
+%         awmv = computeAWMV_1D(Xkp1,sigmas);
+%         awmv_indep = computeAWMV_1D(X_init,sigmas);
+%         plot(linspace(3,15,T))
+%         hold on
+%         plot(awmv)
+%         plot(awmv_indep)
+%         hold off
 
         
     end

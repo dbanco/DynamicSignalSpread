@@ -3,22 +3,20 @@ function AtR = AtR_ft_1D( A0, R )
 % Elementwise multiplies each basis function of A0ft_stack with fft(R)
 %
 % Inputs:
-% A0 - (n x t) array
-% R - (n x 1) array
-% (n x 1) is the size of the image and basis functions
-% (t x 1) indexes the basis function by theta variance 
+% A0 - (N x K) array
+% R - (N x 1) array
 %
 % Outputs:
-% AtR - (n x m x t x r) array
+% AtR - (N x K) array
 
 
 AtR = zeros(size(A0));
 
 R_ft = fft(R);
 
-for tv = 1:size(A0,2)
-        y = real(ifft(A0(:,tv).*R_ft(:)));
-        AtR(:,tv) = y;
+for k = 1:size(A0,2)
+        y = ifft(conj(A0(:,k)).*R_ft(:));
+        AtR(:,k) = y;
 end
 
 

@@ -2,10 +2,10 @@ function awmv = computeAWMV_1D(x,sigmas)
 %computeAWMV_1D
 % Inputs
 % x-      (N x K) array of fitted coefficients
-% sigmas- (K x 1) array of dictionary sigmas
+% sigmas- (K x 1) array of dictionary width parameters
 
 % Outputs
-% awmv_az- amplitude weighted mean variance (azimuthal)
+% awmv- amplitude weighted mean variance (azimuthal)
 
 K = numel(sigmas);
 

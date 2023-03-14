@@ -19,7 +19,7 @@ P.N = size(B,1);
 
 % Define dictionary of Gaussian basis functions
 P.K = 20;   % Number of different basis functions 
-P.sigmas = linspace(1/2,25,P.K); % Sigmas of basis functions
+P.sigmas = linspace(1/2,16,P.K); % Sigmas of basis functions
 
 % ADMM parameters
 params.adaptRho = 1; % binary flag for adaptive rho
@@ -42,46 +42,48 @@ params.verbose = 1;      % flag to print objective values at each iteration
 P.params = params;
 
 % Construct dictionary
-A0ft = dictionaryFFT(P);
-A0 = dictionary(P);
+A0ft = peakDictionaryFFT(P);
+A0 = peakDictionary(P);
 
 %% Setup and solve
 % Without temporal coupling
 params.rho1 = 1;                % ADMM parameter 1
-params.lambda = 2e-2*ones(T,1); % Sparsity parameters
+params.lambda = 4e-4*ones(T,1); % Sparsity parameters
 params.rho2 = 0;                % ADMM parameter 2
 params.gamma = 0;               % Smoothness parameter
 X_hat_indep = convADMM_LASSO_CG_TVphi_1D(A0ft,B_poiss,zeros(N,P.K,T),params);
 B_hat_indep = Ax_ft_1D_Time(A0ft,X_hat_indep);
 
 % With temporal coupling
-params.rho2 = 1;     % ADMM parameter 2
-params.gamma = 18e-4;% Smoothness parameter
-X_hat = convADMM_LASSO_CG_TVphi_1D(A0ft,B_poiss,X_hat_indep,params);
+params.rho2 = 0.1;     % ADMM parameter 2
+params.gamma = 5e-3;% Smoothness parameter
+X_hat = convADMM_LASSO_CG_TVphi_1D(A0ft,B_poiss,zeros(N,P.K,T),params);
 B_hat = Ax_ft_1D_Time(A0ft,X_hat);
 
 %% Plot awmv recovery
-fig3 = figure(3);
+fig3 = figure;
 subplot(1,4,1)
 waterfall(B')
 title('truth')
 
 subplot(1,4,2)
 waterfall(B_hat_indep')
-err1 = norm(B_hat_indep(:)-B(:))/norm(B(:))/T;
-title(['recon: ',sprintf('%0.3f',err1)])
+err1a = norm(B_hat_indep(:)-B(:))/norm(B(:));
+err1b = norm(B_hat_indep(:)-B_poiss(:))/norm(B_poiss(:));
+title(['recon: ',sprintf('%0.3f, %0.3f',err1a,err1b)])
 
 subplot(1,4,3)
 waterfall(B_hat')
-err2 = norm(B_hat(:)-B(:))/norm(B(:))/T;
-title(['coupled recon: ',sprintf('%0.3f',err2)])
+err2a = norm(B_hat(:)-B(:))/norm(B(:));
+err2b = norm(B_hat(:)-B_poiss(:))/norm(B_poiss(:));
+title(['coupled recon: ',sprintf('%0.3f, %0.3f',err2a,err2b)])
 
 subplot(1,4,4)
 waterfall(B_poiss')
 title('poisson data')
-fig3.Position = [16 745 1250 240];
 
-fig4 = figure(4);
+
+fig4 = figure;
 awmv1 = computeAWMV_1D(X_hat_indep,P.sigmas);
 awmv2 = computeAWMV_1D(X_hat,P.sigmas);
 awmv_err3 = norm(awmv1-awmv_true)/norm(awmv_true);

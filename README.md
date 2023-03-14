@@ -17,8 +17,8 @@ DiffPhiX_1D.m
 PhiTranDiffTran_1D.m
 
 ## To produce Gaussian peak  dictionary:
-dictionary.m
-dictionaryFFT.m
+peakDictionary.m
+peakDictionaryFFT.m
 gaussian_basis_wrap_1D.m
 
 ## ADMM algorithm:
